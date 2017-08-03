@@ -4,6 +4,7 @@ const mongo =require('mongodb');
 const url = require('./config').url;
 const doc = require('./config').collection;
 const port = require('./config').port;
+const test = require('./tester').validURL;
 const app = express();
 
 
@@ -14,6 +15,10 @@ app.get('/',function(req,res){
 
 app.get('/new/*',function(req,res){
 	redirectURL = req.params[0];
+	if(!test(redirectURL))
+	{
+		return res.send('NOT A VALID URL')
+	}
 	code=uid2(10);
 	let reqdURL = "http://localhost:"+port+""+code;
 	let data = {
