@@ -10,7 +10,18 @@ const app = express();
 
 var redirectURL,code;
 app.get('/',function(req,res){
-	return res.send("<h2>URL SHORTENER MS</h2>");
+	const MongoClient = mongo.MongoClient;
+	MongoClient.connect(url,function(err,db){
+		if(err)
+			{
+				return res.send("<h2>URL FAILED</h2>");
+			}
+		else
+			{
+				return res.send("<h2>URL CONNECT</h2>");
+			}
+			db.close();
+	});
 });
 
 app.get('/new/*',function(req,res){
@@ -19,8 +30,7 @@ app.get('/new/*',function(req,res){
 	{
 		return res.send('NOT A VALID URL')
 	}
-	code=uid2(10);
-	let reqdURL = "http://localhost:"+port+""+code;
+	code=uid2(5);
 	let data = {
 		"orignalURL":redirectURL,
 		"code":code
@@ -29,7 +39,7 @@ app.get('/new/*',function(req,res){
 	MongoClient.connect(url,function(err,db){
 		if(err)
 			{
-				console.log("DATABASE CONNECTION FAILED");
+				res.send("DATABASE CONNECTION FAILED");
 			}
 		else
 			{
@@ -48,27 +58,26 @@ app.get('/:code',function (req,res) {
 	MongoClient.connect(url,function(err,db){
 		if(err)
 			{
-				console.log("DATABASE CONNECTION FAILED");
+				return res.send("DATABASE CONNECTION FAILED");
 			}
 		else
 			{
 				console.log("DATABASE CONNECTION SUCCESSFUL");
 				var urls = db.collection(doc);
-				urls.find({"code":getCode}).toArray(function(err,docs){
+				urls.find({"code":getCode.toString()}).toArray(function(err,docs){
 					if(err)
 						{
-							res.send(err);
+							return res.send(err);
 						}
 					else if(docs.length > 0)
 						{
-							res.redirect(docs[0]["orignalURL"]);
+							return res.redirect(docs[0]["orignalURL"]);
 						}
 					else
 						{
-							res.send("NO SUCH URL");
+							return res.send("NO SUCH URL");
 						}
 				});
-				//return res.send(doc[0].orignalURL);
 			}
 		db.close();
 	});
